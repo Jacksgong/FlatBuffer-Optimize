@@ -110,8 +110,8 @@ def main():
                 cache_name = value_name + '_cache'
 
                 if is_list(line):
-                    has_set_list = 'hasSetList_' + value_name
-                    has_set_list_def = '  public byte ' + has_set_list + ' = 0;\n'
+                    list_offset = 'list_' + value_name + '_offset'
+                    has_set_list_def = '  public int ' + list_offset + ' = -1;\n'
 
                     type_object = get_base_type_object(type);
                     cache_def = '  public android.util.SparseArray<' + type_object + '> ' + cache_name + ' = new android.util.SparseArray<' + type_object + '>();\n'
@@ -119,14 +119,16 @@ def main():
                     origin_method_pre = line[0:line.index('{') + 1] + \
                                         ' if ( ' + cache_name + '.get(j) != null ) { return ' + cache_name + '.get(j); } '
                     origin_method_mid = line[line.index('{') + 1: line.index('}')]
+                    origin_method_mid = origin_method_mid.replace('__offset',
+                                                                  list_offset + ' != -1? ' + list_offset + ' : __offset')
                     origin_method_mid = origin_method_mid.replace('return', type + ' value = ')
-                    origin_method_end = ' ' + has_set_list + ' = (byte)(o == 0? -1 : 1); ' + cache_name + '.put( j, value); return value; }'
+                    origin_method_end = ' ' + list_offset + ' = o; ' + cache_name + '.put( j, value); return value; }'
                     origin_method_def = origin_method_pre + origin_method_mid + origin_method_end + '\n'
 
-                    has_set_method_pre = '  public boolean hasSet_' + value_name + '() { if ( ' + has_set_list + ' != 0 ) { return ' + \
-                                         has_set_list + '== 1; } '
-                    has_set_method_mid = 'int o = __offset(' + offset_nums + '); ' + has_set_list + ' = (byte)(o == 0? -1: 1); '
-                    has_set_method_end = 'return ' + has_set_list + '== 1; }'
+                    has_set_method_pre = '  public boolean hasSet_' + value_name + '() { if ( ' + list_offset + ' != -1 ) { return ' + \
+                                         list_offset + ' != 0; } '
+                    has_set_method_mid = list_offset + ' = __offset(' + offset_nums + '); '
+                    has_set_method_end = 'return ' + list_offset + '!= 0; }'
 
                     has_set_method_def = has_set_method_pre + has_set_method_mid + has_set_method_end + '\n'
 
