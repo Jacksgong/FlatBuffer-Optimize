@@ -1,12 +1,16 @@
 # Flatbuffer Use Optimize
 ### 一. Tool Launguage
-python
+python.
 
-### 二. Effect
+### 二. Cause
+1. __offset() method is not fast enough.
+2. for get a varaible may need to calls __offset() method many times.
+
+### 三. Effect
 1. Add has set method for flatbuffer file.
-2. Add member variables cache (include array variables)
+2. Add member variables cache (include array variables).
 
-### 三. Exp
+### 四. Exp
 
 origin:
 
@@ -31,5 +35,5 @@ convert to:
 	public String fontFamily(int j) { if ( fontFamily_cache.get(j) != null ) { return fontFamily_cache.get(j); }  int o = __offset(10); String value =  o != 0 ? __string(__vector(o) + j * 4) : null;  hasSetList_fontFamily = (byte)(o == 0? -1 : 1); fontFamily_cache.put( j, value); return value; }
 	public boolean hasSet_fontFamily() { if ( hasSetList_fontFamily != 0 ) { return hasSetList_fontFamily== 1; } int o = __offset(10); hasSetList_fontFamily = (byte)(o == 0? -1: 1); return hasSetList_fontFamily== 1; }
 
-### 四. Tips
+### 五. Tips
 Flatbuffer is very fast from flatbuffer instream to avaliable object, but `__offset()` is very slow, so very frequently invoked almost not recommended. I tested 100,000 times `__offset()`, consuming greater than 50ms, but Java object directly accesse the same time only need 2~3ms. So such tool is come, but you need to pay attention to the increase of the GC.
